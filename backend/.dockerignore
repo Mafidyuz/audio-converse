@@ -1,0 +1,21 @@
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment directory
+venv/
+.env
+
+# Ignore temp files
+*.log
+temp/
+
+# Ignore Dockerfile and docker-compose file (not needed in container)
+Dockerfile
+docker-compose.yml
+
+# Ignore IDE or editor-specific files
+.vscode/
+.idea/

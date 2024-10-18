@@ -1,0 +1,52 @@
+.new-meeting-form {
+    padding: 40px;
+    background-color: #fafafa;
+}
+
+.action-card {
+    text-align: center;
+    padding: 40px;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.record-button {
+    background-color: #00bfa6;
+    border-color: #00bfa6;
+    color: white;
+}
+
+.record-button:hover {
+    background-color: #00a292;
+    border-color: #00a292;
+}
+
+.transcribe-button, .summarize-button {
+    width: 180px;
+    background-color: #1890ff;
+    border-color: #1890ff;
+}
+
+.transcribe-button:hover, .summarize-button:hover {
+    background-color: #40a9ff;
+    border-color: #40a9ff;
+}
+
+.sound-wave {
+    margin: 20px auto;
+    max-width: 100%;
+}
+
+.result-card {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    height: 500px;
+}
+
+.result-card .ant-input {
+    font-size: 16px;
+    border: none;
+}
