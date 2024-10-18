@@ -20,7 +20,7 @@ function App() {
             {/* Header Section */}
             <Header className="app-header">
                 <Typography.Title level={3} className="app-title">
-                    Your Audio Meeting Assistant
+                    AudioConverse
                 </Typography.Title>
             </Header>
 

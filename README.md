@@ -41,12 +41,10 @@ AudioConverse is an interactive web application that allows users to upload audi
 - **Qdrant Dashboard**: [http://localhost:6333](http://localhost:6333)
 
 ## Environment Variables
-- Create a `.env` file in the `chatbot` directory and add your OpenAI API key:
+- Create a `.env` file in the root directory of the project and add your OpenAI API key, as shown in the .env.example file:
   ```
   OPENAI_API_KEY=your_api_key
   ```
-
-- Additionally, create a `.env.example` file in the `chatbot` directory to provide an example of required environment variables.
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any improvements or bug fixes.
