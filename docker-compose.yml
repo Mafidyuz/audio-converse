@@ -17,7 +17,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - ./frontend/src:/app/src
     environment:
       - NODE_ENV=production
     command: npm start
