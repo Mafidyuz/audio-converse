@@ -24,11 +24,11 @@ AudioConverse is an interactive web application that allows users to upload audi
 ### Running the Application
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/AudioConverse.git
+   git clone https://github.com/Mafidyuz/audio-converse.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd AudioConverse
+   cd audio-converse
    ```
 3. Build and start the services:
    ```bash
