@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Upload, Button, Input, Card, Row, Col, Typography, Space, message } from 'antd';
-import { UploadOutlined, AudioOutlined, FileTextOutlined, StopOutlined } from '@ant-design/icons';
+import { UploadOutlined, AudioOutlined, FileTextOutlined, StopOutlined, CheckOutlined } from '@ant-design/icons';
 import { ReactMic } from 'react-mic';
-import './MeetingForm.css'; // Updated styles for the new form
+import './MeetingForm.css';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
-const { Dragger } = Upload; // Import Dragger
+const { Dragger } = Upload;
 
 const MeetingForm = () => {
     const [audioFile, setAudioFile] = useState(null);
@@ -15,14 +15,17 @@ const MeetingForm = () => {
     const [recordedBlob, setRecordedBlob] = useState(null);
     const [transcription, setTranscription] = useState("");
     const [summary, setSummary] = useState("");
+    const [isEditable, setIsEditable] = useState({ transcription: true, summary: true });
+    const [transcriptionConfirmed, setTranscriptionConfirmed] = useState(false);
+    const [summaryConfirmed, setSummaryConfirmed] = useState(false);
+
+    const backendUrl = 'http://localhost:5000';
 
     const handleUpload = (file) => {
         setAudioFile(file);
-        setRecordedBlob(null); // Clear previous recordings
-        return false; // Prevent auto-upload
+        setRecordedBlob(null);
+        return false;
     };
-
-    const backendUrl = 'http://localhost:5000'; // Your backend URL
 
     const handleTranscription = async () => {
         const formData = new FormData();
@@ -35,12 +38,10 @@ const MeetingForm = () => {
         }
 
         try {
-            const response = await axios.post(`${backendUrl}/transcribe`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            const response = await axios.post(`${backendUrl}/transcribe`, formData);
             setTranscription(response.data.transcription);
+            setIsEditable(prev => ({ ...prev, transcription: true }));
+            setTranscriptionConfirmed(false); // Reset confirmation state if new transcription is made
             message.success('Transcription completed!');
         } catch (error) {
             console.error("Error during transcription:", error);
@@ -50,10 +51,10 @@ const MeetingForm = () => {
 
     const handleSummary = async () => {
         try {
-            const response = await axios.post(`${backendUrl}/summarize`, {
-                transcription: transcription,
-            });
+            const response = await axios.post(`${backendUrl}/summarize`, { transcription });
             setSummary(response.data.summary);
+            setIsEditable(prev => ({ ...prev, summary: true }));
+            setSummaryConfirmed(false); // Reset confirmation state if new summary is made
             message.success('Summary generated!');
         } catch (error) {
             console.error("Error during summarization:", error);
@@ -61,9 +62,35 @@ const MeetingForm = () => {
         }
     };
 
+    // Confirm transcription only
+    const handleConfirmTranscription = async () => {
+        try {
+            await axios.post(`${backendUrl}/confirm`, { transcription });
+            message.success('Transcription confirmed and saved!');
+            setIsEditable(prev => ({ ...prev, transcription: false }));
+            setTranscriptionConfirmed(true); // Set confirmation state
+        } catch (error) {
+            console.error("Error saving transcription:", error);
+            message.error('Saving transcription failed.');
+        }
+    };
+
+    // Confirm summary only
+    const handleConfirmSummary = async () => {
+        try {
+            await axios.post(`${backendUrl}/confirm`, { summary });
+            message.success('Summary confirmed and saved!');
+            setIsEditable(prev => ({ ...prev, summary: false }));
+            setSummaryConfirmed(true); // Set confirmation state
+        } catch (error) {
+            console.error("Error saving summary:", error);
+            message.error('Saving summary failed.');
+        }
+    };
+
     const startRecording = () => {
         setRecording(true);
-        setAudioFile(null); // Clear uploaded file if recording starts
+        setAudioFile(null);
     };
 
     const stopRecording = () => {
@@ -72,7 +99,7 @@ const MeetingForm = () => {
 
     const onStopRecording = (recordedBlob) => {
         setRecordedBlob(recordedBlob);
-        setAudioFile(null); // Use the recording
+        setAudioFile(null);
     };
 
     return (
@@ -82,8 +109,6 @@ const MeetingForm = () => {
                     <Card className="action-card" hoverable>
                         <Space direction="vertical" size="large" align="center">
                             <Title level={4}>Audio Input</Title>
-
-                            {/* Dragger for Drag-and-Drop upload */}
                             <Dragger
                                 beforeUpload={handleUpload}
                                 showUploadList={false}
@@ -94,52 +119,29 @@ const MeetingForm = () => {
                                     <UploadOutlined style={{ fontSize: '32px', color: '#1890ff' }} />
                                 </p>
                                 <p className="ant-upload-text">Click or drag audio files to upload</p>
-                                <p className="ant-upload-hint">Supports MP3, WAV, and other audio formats.</p>
                             </Dragger>
 
-                            {/* Optional file name display */}
                             {audioFile && <Text strong>{audioFile.name}</Text>}
 
                             <Space size="large">
-                                <Button
-                                    onClick={startRecording}
-                                    icon={<AudioOutlined />}
-                                    size="large"
-                                    disabled={recording}
-                                    className="record-button"
-                                >
+                                <Button onClick={startRecording} icon={<AudioOutlined />} size="large" disabled={recording}>
                                     Record Audio
                                 </Button>
-                                <Button
-                                    onClick={stopRecording}
-                                    icon={<StopOutlined />}
-                                    size="large"
-                                    disabled={!recording}
-                                    danger
-                                >
+                                <Button onClick={stopRecording} icon={<StopOutlined />} size="large" disabled={!recording} danger>
                                     Stop Recording
                                 </Button>
                             </Space>
 
                             <ReactMic
                                 record={recording}
-                                className="sound-wave"
                                 onStop={onStopRecording}
                                 mimeType="audio/wav"
                                 strokeColor="#FF4081"
                                 backgroundColor="#F0F0F0"
-                                style={{ marginTop: '24px', marginBottom: '24px' }}
                             />
 
                             {(recordedBlob || audioFile) && (
-                                <Button
-                                    type="primary"
-                                    size="large"
-                                    onClick={handleTranscription}
-                                    icon={<FileTextOutlined />}
-                                    className="transcribe-button"
-                                    style={{ marginTop: '16px' }}
-                                >
+                                <Button type="primary" size="large" onClick={handleTranscription} icon={<FileTextOutlined />}>
                                     Transcribe Audio
                                 </Button>
                             )}
@@ -150,28 +152,50 @@ const MeetingForm = () => {
 
             <Row gutter={[32, 32]} style={{ marginBottom: '32px' }}>
                 <Col span={12}>
-                    <Card title="Transcription" className="result-card">
-                        <TextArea value={transcription} rows={8} readOnly style={{ padding: '12px' }} />
+                    <Card title="Transcription">
+                        <TextArea
+                            value={transcription}
+                            onChange={(e) => setTranscription(e.target.value)}
+                            rows={8}
+                            readOnly={!isEditable.transcription}
+                        />
+                        <Button
+                            type="primary"
+                            size="large"
+                            onClick={handleConfirmTranscription}
+                            icon={<CheckOutlined />}
+                            disabled={!transcription || transcriptionConfirmed}
+                            style={{ marginTop: '16px' }}
+                        >
+                            {transcriptionConfirmed ? 'Confirmed' : 'Confirm Transcription'}
+                        </Button>
                     </Card>
                 </Col>
                 <Col span={12}>
-                    <Card title="Summary" className="result-card">
-                        <TextArea value={summary} rows={8} readOnly style={{ padding: '12px' }} />
+                    <Card title="Summary">
+                        <TextArea
+                            value={summary}
+                            onChange={(e) => setSummary(e.target.value)}
+                            rows={8}
+                            readOnly={!isEditable.summary}
+                        />
+                        <Button
+                            type="primary"
+                            size="large"
+                            onClick={handleConfirmSummary}
+                            icon={<CheckOutlined />}
+                            disabled={!summary || summaryConfirmed}
+                            style={{ marginTop: '16px' }}
+                        >
+                            {summaryConfirmed ? 'Confirmed' : 'Confirm Summary'}
+                        </Button>
                     </Card>
                 </Col>
             </Row>
 
             <Row justify="center">
                 <Col>
-                    <Button
-                        type="primary"
-                        size="large"
-                        onClick={handleSummary}
-                        icon={<FileTextOutlined />}
-                        disabled={!transcription}
-                        className="summarize-button"
-                        style={{ marginTop: '16px' }}
-                    >
+                    <Button type="primary" size="large" onClick={handleSummary} icon={<FileTextOutlined />} disabled={!transcription}>
                         Generate Summary
                     </Button>
                 </Col>
