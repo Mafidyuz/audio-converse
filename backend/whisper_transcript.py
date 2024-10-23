@@ -2,7 +2,7 @@ import whisper
 import os
 
 # Load the Whisper model
-model = whisper.load_model("base")
+model = whisper.load_model("turbo")
 
 def transcribe_audio(audio_file):
     # Ensure the 'temp' directory exists
