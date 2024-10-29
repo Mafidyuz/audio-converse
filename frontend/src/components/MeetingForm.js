@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Upload, Button, Input, Card, Row, Col, Typography, Space, message } from 'antd';
+import { Upload, Button, Input, Card, Row, Col, Typography, Space, message, Select } from 'antd';
 import { UploadOutlined, AudioOutlined, FileTextOutlined, StopOutlined, CheckOutlined } from '@ant-design/icons';
 import { ReactMic } from 'react-mic';
 import './MeetingForm.css';
@@ -8,6 +8,7 @@ import './MeetingForm.css';
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Dragger } = Upload;
+const { Option } = Select;
 
 const MeetingForm = () => {
     const [audioFile, setAudioFile] = useState(null);
@@ -18,6 +19,7 @@ const MeetingForm = () => {
     const [isEditable, setIsEditable] = useState({ transcription: true, summary: true });
     const [transcriptionConfirmed, setTranscriptionConfirmed] = useState(false);
     const [summaryConfirmed, setSummaryConfirmed] = useState(false);
+    const [transcriptionSource, setTranscriptionSource] = useState('local'); // Default to local
 
     const backendUrl = 'http://localhost:5000';
 
@@ -36,6 +38,8 @@ const MeetingForm = () => {
         } else {
             return;
         }
+
+        formData.append('source', transcriptionSource); // Add the transcription source to the request
 
         try {
             const response = await axios.post(`${backendUrl}/transcribe`, formData);
@@ -139,6 +143,15 @@ const MeetingForm = () => {
                                 strokeColor="#FF4081"
                                 backgroundColor="#F0F0F0"
                             />
+
+                            <Select
+                                defaultValue="local"
+                                style={{ width: 250, marginTop: '16px' }}
+                                onChange={(value) => setTranscriptionSource(value)}
+                            >
+                                <Option value="local">Local Transcription</Option>
+                                <Option value="openai">OpenAI Server's Transcription</Option>
+                            </Select>
 
                             {(recordedBlob || audioFile) && (
                                 <Button type="primary" size="large" onClick={handleTranscription} icon={<FileTextOutlined />}>

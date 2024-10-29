@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from whisper_transcript import transcribe_audio
+from whisper_transcript import transcribe_audio_local, transcribe_audio_server
 from gpt_summary import generate_summary
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import VectorParams, PointStruct
@@ -38,7 +38,13 @@ def get_embeddings(text):
 @app.route("/transcribe", methods=["POST"])
 def transcribe():
     file = request.files['file']
-    transcription = transcribe_audio(file)
+    source = request.form.get('source', 'local')  # Get the source parameter, default to 'local'
+
+    if source == 'openai':
+        transcription = transcribe_audio_server(file)
+    else:
+        transcription = transcribe_audio_local(file)
+
     return jsonify({"transcription": transcription})
 
 @app.route("/summarize", methods=["POST"])
